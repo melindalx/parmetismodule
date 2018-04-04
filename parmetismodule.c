@@ -63,12 +63,17 @@ parmetis_PyParMETIS_V3_PartKway(PyObject *self, PyObject *args, PyObject *keywds
 	PyObject *pycomm = NULL;
 	MPI_Comm *pcomm = NULL;
 
-	static char *kwlist[] = {"vtxdist", "xadj", "adjncy", "nparts", "comm", "vwgt", "adjwgt",
-								"wgtflag", "numflag", "ncon", "tpwgts", "ubvec", "options", NULL};
-	if (!PyArg_ParseTupleAndKeywords(args, keywds, "O!O!O!iO|O!O!iiiO!O!O!", kwlist,
-									&PyArray_Type, &pyvtxdist, &PyArray_Type, &pyxadj, &PyArray_Type, &pyadjncy, &nparts, &pycomm,
-									&PyArray_Type, &pyvwgt, &PyArray_Type, &pyadjwgt, &wgtflag, &numflag, &ncon,
-									&PyArray_Type, &pytpwgts, &PyArray_Type, &pyubvec, &PyArray_Type, &pyoptions))
+	static char *kwlist[] = {
+		"vtxdist", "xadj", "adjncy", "nparts", "comm", "vwgt", "adjwgt",
+		"wgtflag", "numflag", "ncon", "tpwgts", "ubvec", "options", NULL};
+	if (!PyArg_ParseTupleAndKeywords(
+		args, keywds, "O!O!O!iO|O!O!iiiO!O!O!", kwlist,
+		&PyArray_Type, &pyvtxdist, &PyArray_Type, &pyxadj,
+		&PyArray_Type, &pyadjncy, &nparts, &pycomm,
+		&PyArray_Type, &pyvwgt, &PyArray_Type, &pyadjwgt,
+		&wgtflag, &numflag, &ncon,
+		&PyArray_Type, &pytpwgts, &PyArray_Type, &pyubvec,
+		&PyArray_Type, &pyoptions))
 		return NULL;
 
 	pcomm = PyMPIComm_Get(pycomm);
@@ -79,18 +84,11 @@ parmetis_PyParMETIS_V3_PartKway(PyObject *self, PyObject *args, PyObject *keywds
 	xadj = cintarray(pyxadj);
 	adjncy = cintarray(pyadjncy);
 	if (NULL != pyvwgt)
-	{
-		printf("I have weight!\n");
 		vwgt = cintarray(pyvwgt);
-	}
 	if (NULL != pyadjwgt)
-	{
-		printf("I have adjwgt!\n");
 		adjwgt = cintarray(pyadjwgt);
-	}
 	if (NULL != pytpwgts)
 	{
-		printf("I have tpwgts\n");
 		tpwgts = cdoublearray(pytpwgts);
 	} else {
 		tpwgts = (double *)malloc(sizeof(double) * ncon * nparts);
@@ -101,7 +99,6 @@ parmetis_PyParMETIS_V3_PartKway(PyObject *self, PyObject *args, PyObject *keywds
 	}
 	if (NULL != pyubvec)
 	{
-		printf("I have ubvec\n");
 		ubvec = cdoublearray(pyubvec);
 	} else {
 		ubvec = (double *)malloc(sizeof(double) * ncon);
@@ -112,7 +109,6 @@ parmetis_PyParMETIS_V3_PartKway(PyObject *self, PyObject *args, PyObject *keywds
 	}
 	if (NULL != pyoptions)
 	{
-		printf("I have options.\n");
 		options = cintarray(pyoptions);
 	}
 
@@ -120,11 +116,13 @@ parmetis_PyParMETIS_V3_PartKway(PyObject *self, PyObject *args, PyObject *keywds
     idx_t *part = (int64_t *)malloc(sizeof(int64_t) * nvertex);
     idx_t edgecut;
 
-	int err = ParMETIS_V3_PartKway(vtxdist, xadj, adjncy, vwgt, adjwgt, &wgtflag,
-									&numflag, &ncon, &nparts, tpwgts, ubvec,
-									options, &edgecut, part, pcomm);
+	int err = ParMETIS_V3_PartKway(
+		vtxdist, xadj, adjncy, vwgt, adjwgt, &wgtflag,
+		&numflag, &ncon, &nparts, tpwgts, ubvec,
+		options, &edgecut, part, pcomm);
 
-	PyArrayObject *pypart = (PyArrayObject *)PyArray_FromDims(1, &nvertex, NPY_INT64);
+	PyArrayObject *pypart =
+		(PyArrayObject *)PyArray_FromDims(1, &nvertex, NPY_INT64);
 	uint64_t *pypartdata = (uint64_t *)pypart->data;
 	for (int ipart = 0; ipart < nvertex; ++ipart)
 	{
@@ -138,8 +136,12 @@ parmetis_PyParMETIS_V3_PartKway(PyObject *self, PyObject *args, PyObject *keywds
 	return Py_BuildValue("iiO", err, edgecut, pypart);
 }
 
+// The module's methods table and initialize function
 static PyMethodDef ParmetisMethods[] = {
-	{"PyParMETIS_V3_PartKway",(PyCFunction) parmetis_PyParMETIS_V3_PartKway, METH_VARARGS | METH_KEYWORDS, "Partation the graph parallelly."},
+	{"PyParMETIS_V3_PartKway",
+		(PyCFunction) parmetis_PyParMETIS_V3_PartKway,
+		METH_VARARGS | METH_KEYWORDS,
+		"Partation the graph parallelly."},
 	{NULL, NULL, 0, NULL}
 };
 
