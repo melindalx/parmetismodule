@@ -249,14 +249,32 @@ static PyMethodDef ParmetisMethods[] = {
 	{NULL, NULL, 0, NULL}
 };
 
-void initparmetis(void)
+// For python3
+static struct PyModuleDef parmetismodule = {
+    PyModuleDef_HEAD_INIT,
+    "parmetis",	/* name of module */
+    "",			/* module documentation, may be NULL */
+    -1,			/* size of per-interpreter state of the module, or -1 if the module keeps state in global variables. */
+    ParmetisMethods
+};
+
+PyMODINIT_FUNC
+PyInit_parmetis(void)
 {
-	PyObject *m;
-
-	m = Py_InitModule("parmetis", ParmetisMethods);
-	if (m == NULL)
-		return;
-
 	import_array();
 	import_mpi4py();
+
+    return PyModule_Create(&parmetismodule);
 }
+
+// void initparmetis(void)
+// {
+// 	PyObject *m;
+
+// 	m = Py_InitModule("parmetis", ParmetisMethods);
+// 	if (m == NULL)
+// 		return;
+
+// 	import_array();
+// 	import_mpi4py();
+// }
