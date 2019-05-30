@@ -1,3 +1,4 @@
+#define PY_SSIZE_T_CLEAN
 #include "Python.h"
 #include "numpy/arrayobject.h"
 #include "mpi4py/mpi4py.h"
@@ -185,7 +186,9 @@ parmetis_PyParMETIS_V3_PartMeshKway(PyObject *self, PyObject *args, PyObject *ke
 	eptr = cintarray(pyeptr);
 	eind = cintarray(pyeind);
 	if (NULL != pyelmdist)
+	{
 		elmwgt = cintarray(pyelmwgt);
+	}
 	if (NULL != pytpwgts)
 	{
 		tpwgts = cdoublearray(pytpwgts);
